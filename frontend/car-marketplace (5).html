@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoVault — Premium Car Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --surface: #111116;
+    --surface2: #1a1a22;
+    --border: #2a2a38;
+    --accent: #e8ff47;
+    --accent2: #ff4757;
+    --text: #f0f0f8;
+    --muted: #6b6b8a;
+    --card-bg: #13131c;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: .4;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+  /* ── NAVBAR ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(10,10,12,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--accent);
+  }
+  .nav-logo span { color: var(--text); }
+  .nav-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .nav-links button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all .2s;
+    letter-spacing: 0.5px;
+  }
+  .nav-links button:hover, .nav-links button.active {
+    color: var(--text);
+    background: var(--surface2);
+  }
+  .btn-accent {
+    background: var(--accent) !important;
+    color: #0a0a0c !important;
+    font-weight: 500 !important;
+    padding: 8px 20px !important;
+  }
+  .btn-accent:hover { opacity: .85 !important; }
+
+  /* ── PAGES ── */
+  .page { display: none; padding-top: 85px; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    padding: 80px 48px 60px;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(232,255,71,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255,71,87,0.04) 0%, transparent 60%);
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    font-family: 'DM Mono', monospace;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 10vw, 120px);
+    line-height: .9;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+    -webkit-text-stroke: 1px var(--accent);
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 18px;
+    max-width: 520px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0a0c;
+    border: none;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    transition: all .2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,255,71,0.25); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all .2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 60px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+  }
+  .stat-item {}
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 48px; }
+
+  /* ── SECTION ── */
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-top: 64px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+  .section-title span { color: var(--accent); }
+  .section-sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  /* ── CATEGORIES ── */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    padding-bottom: 64px;
+  }
+  .category-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all .25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .category-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(232,255,71,0.06) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .category-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+  .category-card:hover::before { opacity: 1; }
+  .cat-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    background: var(--surface2);
+  }
+  .cat-img-placeholder {
+    width: 100%;
+    height: 120px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+  }
+  .cat-name { font-weight: 500; font-size: 15px; margin-bottom: 4px; }
+  .cat-count { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  /* ── CARS GRID ── */
+  .cars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    padding-bottom: 80px;
+  }
+  .car-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all .3s;
+    animation: fadeUp .4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .car-card:hover { border-color: rgba(232,255,71,0.3); transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+  .car-img-wrap {
+    position: relative;
+    height: 200px;
+    background: var(--surface2);
+    overflow: hidden;
+  }
+  .car-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .4s;
+  }
+  .car-card:hover .car-img-wrap img { transform: scale(1.05); }
+  .car-img-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px;
+    background: linear-gradient(135deg, #1a1a22 0%, #111116 100%);
+  }
+  .car-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: var(--accent);
+    color: #0a0a0c;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  .car-body { padding: 20px; }
+  .car-name { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+  .car-category { font-size: 12px; color: var(--accent); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .car-specs {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .spec {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .spec-icon { font-size: 14px; }
+  .car-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .car-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: var(--accent);
+  }
+  .car-price span { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); display: block; }
+  .btn-view {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-view:hover { background: var(--accent); color: #0a0a0c; border-color: var(--accent); }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-bar input, .filter-bar select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .filter-bar input:focus, .filter-bar select:focus { border-color: var(--accent); }
+  .filter-bar input { flex: 1; min-width: 220px; }
+  .filter-bar select { min-width: 160px; }
+  .filter-bar select option { background: var(--surface); }
+
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn .25s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(.96) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-header {
+    padding: 28px 32px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+  }
+  .modal-close {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .modal-close:hover { background: var(--accent2); color: white; border-color: var(--accent2); }
+  .modal-body { padding: 0 32px 32px; }
+
+  /* ── FORM ── */
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+  .form-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--muted); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .form-error { font-size: 12px; color: var(--accent2); margin-top: 6px; display: none; }
+
+  /* ── OTP INPUTS ── */
+  .otp-inputs {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 8px 0;
+  }
+  .otp-input {
+    width: 52px; height: 60px;
+    text-align: center;
+    font-size: 22px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .otp-input:focus { border-color: var(--accent); }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 7px;
+    transition: all .2s;
+  }
+  .tab-btn.active { background: var(--surface2); color: var(--text); }
+
+  /* ── TOAST ── */
+  .toast-container {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 9998;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .toast {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    animation: slideIn .3s ease;
+    min-width: 260px;
+  }
+  .toast.error { border-left-color: var(--accent2); }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--muted);
+  }
+  .empty-state-icon { font-size: 64px; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 20px; color: var(--text); margin-bottom: 8px; }
+
+  /* ── CAR DETAIL ── */
+  .car-detail { padding: 32px 48px 80px; max-width: 1100px; margin: 0 auto; }
+  .car-detail-back {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 14px; cursor: pointer;
+    margin-bottom: 32px;
+    background: none; border: none; font-family: 'DM Sans', sans-serif;
+    transition: color .2s;
+  }
+  .car-detail-back:hover { color: var(--accent); }
+  .car-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 40px;
+    align-items: start;
+  }
+  .car-detail-img {
+    border-radius: 16px;
+    overflow: hidden;
+    aspect-ratio: 16/10;
+    background: var(--surface2);
+  }
+  .car-detail-img img { width: 100%; height: 100%; object-fit: cover; }
+  .car-detail-info { }
+  .car-detail-cat { font-size: 12px; color: var(--accent); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+  .car-detail-name { font-family: 'Bebas Neue', sans-serif; font-size: 56px; line-height: 1; letter-spacing: 2px; margin-bottom: 24px; }
+  .car-detail-price { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--accent); margin-bottom: 32px; letter-spacing: 1px; }
+  .car-detail-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .detail-spec {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .detail-spec-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-family: 'DM Mono', monospace; margin-bottom: 6px; }
+  .detail-spec-value { font-size: 16px; font-weight: 500; }
+  .car-detail-desc { color: var(--muted); font-size: 15px; line-height: 1.7; }
+
+  /* ── ADMIN PANEL ── */
+  .admin-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 85px);
+  }
+  .admin-sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    position: sticky;
+    top: 85px;
+    height: calc(100vh - 85px);
+    overflow-y: auto;
+  }
+  .admin-sidebar-title {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 0 24px;
+    margin-bottom: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+  .admin-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .2s;
+    border-left: 2px solid transparent;
+  }
+  .admin-nav-item:hover, .admin-nav-item.active {
+    color: var(--text);
+    background: var(--surface2);
+    border-left-color: var(--accent);
+  }
+  .admin-nav-item.active { color: var(--accent); }
+  .admin-content { padding: 40px; }
+  .admin-table-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .admin-table th {
+    background: var(--surface);
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .table-actions { display: flex; gap: 8px; }
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all .2s;
+  }
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm.danger:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ── LOADING ── */
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; padding: 60px; color: var(--muted);
+  }
+  .spinner {
+    width: 24px; height: 24px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── USER INDICATOR ── */
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .user-chip:hover { border-color: var(--accent); }
+  .user-avatar {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: #0a0a0c;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+  .text-center { text-align: center; }
+  .text-muted { color: var(--muted); font-size: 13px; }
+  .link-btn {
+    background: none; border: none; color: var(--accent);
+    cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px;
+  }
+  .link-btn:hover { text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .hero { padding: 40px 24px; }
+    .container { padding: 0 24px; }
+    .car-detail { padding: 24px 24px 60px; }
+    .car-detail-grid { grid-template-columns: 1fr; }
+    .admin-layout { grid-template-columns: 1fr; }
+    .admin-sidebar { position: static; height: auto; }
+    .hero-stats { gap: 24px; flex-wrap: wrap; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo">AUTO<span>VAULT</span></div>
+  <div class="nav-links">
+    <button onclick="showPage('home')" class="active" id="nav-home">Bosh sahifa</button>
+    <button onclick="showPage('cars')" id="nav-cars">Mashinalar</button>
+    <button onclick="showPage('categories')" id="nav-categories">Kategoriyalar</button>
+    <span id="nav-auth-area"></span>
+  </div>
+</nav>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══════════ HOME PAGE ══════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div style="position:relative">
+      <div class="hero-tag">Premium Auto Market</div>
+      <h1>DRIVE YOUR<br><em>DREAM</em><br>MACHINE</h1>
+      <p>Eng sara mashinalar platformasi. Arzon narxlarda, sifatli xizmat bilan. Tez toping, tez yetib boring.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="showPage('cars')">Mashinalarni ko'rish →</button>
+        <button class="btn-secondary" onclick="showPage('categories')">Kategoriyalar</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-value" id="stat-cars">—</div>
+          <div class="stat-label">Mashinalar</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="stat-cats">—</div>
+          <div class="stat-label">Kategoriyalar</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">24/7</div>
+          <div class="stat-label">Qo'llab-quvvatlash</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CARS PAGE ══════════ -->
+<div class="page" id="page-cars">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div class="section-title">BARCHA <span>MASHINALAR</span></div>
+        <div class="section-sub">Mavjud mashinalar ro'yxati</div>
+      </div>
+      <button class="btn-primary" id="addCarBtn" style="display:none" onclick="openCarForm()">+ Mashina qo'shish</button>
+    </div>
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="🔍  Mashina nomi bo'yicha qidirish..." oninput="filterCars()">
+      <select id="categoryFilter" onchange="filterCars()">
+        <option value="">Barcha kategoriyalar</option>
+      </select>
+      <select id="sortFilter" onchange="filterCars()">
+        <option value="">Saralash</option>
+        <option value="price_asc">Narx: arzondan qimmatga</option>
+        <option value="price_desc">Narx: qimmatdan arzonga</option>
+        <option value="year_desc">Yangi yildan</option>
+      </select>
+    </div>
+    <div class="cars-grid" id="carsGrid">
+      <div class="loading"><div class="spinner"></div> Yuklanmoqda...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CATEGORIES PAGE ══════════ -->
+<div class="page" id="page-categories">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div class="section-title">KATEGORIYA<span>LAR</span></div>
+        <div class="section-sub">Mashina turi bo'yicha tanlang</div>
+      </div>
+      <button class="btn-primary" id="addCatBtn" style="display:none" onclick="openCatForm()">+ Kategoriya qo'shish</button>
+    </div>
+    <div class="categories-grid" id="categoriesGrid">
+      <div class="loading"><div class="spinner"></div> Yuklanmoqda...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CAR DETAIL PAGE ══════════ -->
+<div class="page" id="page-car-detail">
+  <div class="car-detail" id="carDetailContent">
+    <div class="loading"><div class="spinner"></div> Yuklanmoqda...</div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN PAGE ══════════ -->
+<div class="page" id="page-admin">
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div style="padding:0 24px 24px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">BOSHQARUV</div>
+        <div style="font-size:12px;color:var(--muted)" id="adminUserInfo"></div>
+      </div>
+      <div class="admin-sidebar-title">MENYU</div>
+      <div class="admin-nav-item active" onclick="adminTab('cars')" id="atab-cars">🚗 Mashinalar</div>
+      <div class="admin-nav-item" onclick="adminTab('categories')" id="atab-categories">📂 Kategoriyalar</div>
+      <div class="admin-sidebar-title" style="margin-top:32px">HISOB</div>
+      <div class="admin-nav-item" onclick="openChangePass()">🔑 Parolni o'zgartirish</div>
+      <div class="admin-nav-item" onclick="logout()" style="color:var(--accent2)">↩ Chiqish</div>
+    </div>
+    <div class="admin-content">
+      <div id="admin-cars-panel">
+        <div class="section-header" style="padding-top:0">
+          <div class="section-title" style="font-size:36px">MASHINALAR</div>
+          <button class="btn-primary" onclick="openCarForm()">+ Qo'shish</button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Nomi</th><th>Kategoriya</th><th>Narx</th><th>Yil</th><th>Rang</th><th>Amallar</th></tr></thead>
+            <tbody id="adminCarsTable"><tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="admin-cats-panel" style="display:none">
+        <div class="section-header" style="padding-top:0">
+          <div class="section-title" style="font-size:36px">KATEGORIYALAR</div>
+          <button class="btn-primary" onclick="openCatForm()">+ Qo'shish</button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Nomi</th><th>Sana</th><th>Amallar</th></tr></thead>
+            <tbody id="adminCatsTable"><tr><td colspan="3"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     MODALS
+════════════════════════════════ -->
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="authModalTitle">KIRISH</div>
+      <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="authTab('login')">Kirish</button>
+        <button class="tab-btn" onclick="authTab('register')">Ro'yxatdan o'tish</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="auth-login">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="loginEmail" placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Parol</label>
+          <input class="form-input" type="password" id="loginPassword" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:8px" onclick="doLogin()">Kirish</button>
+        <div class="divider"></div>
+        <div class="text-center">
+          <button class="link-btn" onclick="authTab('forgot')">Parolni unutdingizmi?</button>
+        </div>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="auth-register" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ism</label>
+            <input class="form-input" type="text" id="regFirst" placeholder="Ism">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Familya</label>
+            <input class="form-input" type="text" id="regLast" placeholder="Familya">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="regEmail" placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Parol</label>
+          <input class="form-input" type="password" id="regPassword" placeholder="Kamida 8 ta belgi">
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:8px" onclick="doRegister()">Ro'yxatdan o'tish</button>
+      </div>
+
+      <!-- OTP FORM -->
+      <div id="auth-otp" style="display:none">
+        <p class="text-muted" style="margin-bottom:20px">Emailingizga OTP kod yuborildi. Kodni kiriting:</p>
+        <div class="otp-inputs" id="otpInputs">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this,0)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this,1)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this,2)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this,3)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this,4)">
+          <input class="otp-input" maxlength="1" oninput="otpNext(this,5)">
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:20px" onclick="doVerify()">Tasdiqlash</button>
+        <div class="text-center" style="margin-top:16px">
+          <button class="link-btn" onclick="doResendOtp()">Qayta yuborish</button>
+        </div>
+      </div>
+
+      <!-- FORGOT PASSWORD -->
+      <div id="auth-forgot" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="forgotEmail" placeholder="email@example.com">
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:8px" onclick="doForgot()">Kod yuborish</button>
+        <div class="divider"></div>
+        <div class="text-center"><button class="link-btn" onclick="authTab('login')">← Orqaga</button></div>
+      </div>
+
+      <!-- RESET PASSWORD -->
+      <div id="auth-reset" style="display:none">
+        <div class="form-group">
+          <label class="form-label">OTP Kod</label>
+          <input class="form-input" type="text" id="resetOtp" placeholder="6 xonali kod">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Yangi parol</label>
+          <input class="form-input" type="password" id="resetNewPass" placeholder="Yangi parol">
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:8px" onclick="doReset()">Parolni yangilash</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAR FORM MODAL -->
+<div class="modal-overlay" id="carModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="carModalTitle">MASHINA QO'SHISH</div>
+      <button class="modal-close" onclick="closeModal('carModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editCarId">
+      <div class="form-group">
+        <label class="form-label">Mashina nomi</label>
+        <input class="form-input" id="carName" placeholder="Mercedes-Benz S500">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Narxi ($)</label>
+          <input class="form-input" id="carPrice" type="number" placeholder="45000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ishlab chiqarilgan yil</label>
+          <input class="form-input" id="carYear" type="number" placeholder="2022">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Rang</label>
+          <input class="form-input" id="carColor" placeholder="Qora">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Yurilgan masofa (km)</label>
+          <input class="form-input" id="carDistance" type="number" placeholder="15000">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Eshkak</label>
+          <select class="form-input" id="carGearbox">
+            <option value="">Tanlang</option>
+            <option value="Avtomat">Avtomat</option>
+            <option value="Mexanik">Mexanik</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dvigatel</label>
+          <input class="form-input" id="carEngine" placeholder="3.0L V6">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategoriya</label>
+        <select class="form-input" id="carCategory">
+          <option value="">Kategoriya tanlang</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tavsif</label>
+        <textarea class="form-input" id="carDesc" rows="3" placeholder="Mashina haqida batafsil ma'lumot..."></textarea>
+      </div>
+      <div class="form-group" id="carImageGroup">
+        <label class="form-label">Rasm</label>
+        <input class="form-input" type="file" id="carImage" accept="image/*">
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:8px" onclick="submitCar()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORY FORM MODAL -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="catModalTitle">KATEGORIYA QO'SHISH</div>
+      <button class="modal-close" onclick="closeModal('catModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editCatId">
+      <div class="form-group">
+        <label class="form-label">Kategoriya nomi</label>
+        <input class="form-input" id="catName" placeholder="Sedan, SUV, Sport...">
+      </div>
+      <div class="form-group" id="catImageGroup">
+        <label class="form-label">Rasm</label>
+        <input class="form-input" type="file" id="catImage" accept="image/*">
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:8px" onclick="submitCategory()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="changePassModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">PAROL O'ZGARTIRISH</div>
+      <button class="modal-close" onclick="closeModal('changePassModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Eski parol</label>
+        <input class="form-input" type="password" id="oldPass" placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Yangi parol</label>
+        <input class="form-input" type="password" id="newPass" placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Yangi parolni tasdiqlang</label>
+        <input class="form-input" type="password" id="confirmPass" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:8px" onclick="doChangePass()">O'zgartirish</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BASE_URL = 'http://localhost:4000'; // Backend URL
+
+  // NOTE: Bu faylni "Live Server" yoki "npx serve" orqali oching,
+  // aks holda CORS xatosi chiqadi. Masalan: npx serve . -p 5173
+  let accessToken = localStorage.getItem('accessToken') || null;
+  let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+  // JWT token dan user ma'lumotlarini o'qish
+  function parseUserFromToken(token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return { id: payload.sub, role: payload.role, firstname: payload.firstname || localStorage.getItem('userFirstname') || 'User' };
+    } catch {
+      return null;
+    }
+  }
+  let allCars = [];
+  let allCategories = [];
+  let otpEmail = '';
+  let forgotEmail = '';
+
+  // ── UTILS ──
+  // ── TOKEN MANAGER ──
+  let isRefreshing = false;  // bir vaqtda faqat 1 ta refresh so'rovi ketsin
+
+  async function refreshAccessToken() {
+    if (isRefreshing) {
+      // Allaqachon refresh ketayapti — tugashini kutyapmiz
+      return new Promise(resolve => {
+        const check = setInterval(() => {
+          if (!isRefreshing) {
+            clearInterval(check);
+            resolve(!!accessToken);
+          }
+        }, 100);
+      });
+    }
+
+    isRefreshing = true;
+    try {
+      const r = await fetch(BASE_URL + "/api/auth/refresh", {
+        method: "POST",
+        credentials: "include"
+      });
+      const data = await r.json().catch(() => ({}));
+      if (data.accessToken) {
+        accessToken = data.accessToken;
+        localStorage.setItem("accessToken", accessToken);
+        isRefreshing = false;
+        return true;
+      }
+      isRefreshing = false;
+      return false;
+    } catch {
+      isRefreshing = false;
+      return false;
+    }
+  }
+
+  // 401 yoki expired token belgisi
+  function isExpired(httpStatus, data) {
+    return httpStatus === 401 ||
+           data?.status === 401 ||
+           data?.message === "AccessToken expired" ||
+           data?.message === "Unauthorized" ||
+           data?.message === "Token invalid";
+  }
+
+  // Asosiy API funksiyasi — JSON va FormData ikkalasini ham qo'llab-quvvatlaydi
+  async function api(endpoint, opts = {}) {
+    // FormData bo'lsa opts.formData da uzatiladi
+    const isForm = opts.formData instanceof FormData;
+
+    const makeRequest = (token) => {
+      const headers = { Authorization: "Bearer " + token };
+      // FormData uchun Content-Type qo'ymaymiz — brauzer o'zi to'g'ri qo'yadi
+      if (!isForm) headers["Content-Type"] = "application/json";
+      return fetch(BASE_URL + "/api" + endpoint, {
+        method: opts.method || "GET",
+        headers,
+        body: isForm ? opts.formData : (opts.body || undefined),
+        credentials: "include"
+      });
+    };
+
+    try {
+      let r = await makeRequest(accessToken);
+      let data = await r.json().catch(() => ({}));
+
+      // Token eskirgan bo'lsa — refresh qilib qayta urinamiz
+      if (isExpired(r.status, data)) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          r = await makeRequest(accessToken);
+          data = await r.json().catch(() => ({}));
+        } else {
+          if (currentUser) silentLogout();
+          return null;
+        }
+      }
+
+      return data;
+    } catch {
+      toast("Server bilan aloqa yo'q", "error");
+      return null;
+    }
+  }
+
+  // Sessiya tugaganda — faqat bir marta xabar chiqarish
+  let logoutToastShown = false;
+  function silentLogout() {
+    if (logoutToastShown) return;
+    logoutToastShown = true;
+    accessToken = null;
+    currentUser = null;
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("currentUser");
+    renderAuthArea();
+    // showPage chaqirmaymiz — loop oldini olish uchun
+    // Faqat home ga o'tkazamiz agar admin sahifasida bo'lsa
+    const activePage = document.querySelector(".page.active");
+    if (activePage && ["page-admin"].includes(activePage.id)) {
+      showPage("home");
+    }
+    toast("Sessiya tugadi. Qayta kiring.", "error");
+    setTimeout(() => { logoutToastShown = false; }, 5000);
+  }
+
+  function toast(msg, type = 'success') {
+    const t = document.createElement('div');
+    t.className = 'toast' + (type === 'error' ? ' error' : '');
+    t.innerHTML = (type === 'error' ? '⚠️ ' : '✅ ') + msg;
+    document.getElementById('toastContainer').prepend(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  function formatPrice(p) { return '$' + Number(p).toLocaleString(); }
+  function formatYear(y) { return y; }
+  function imgUrl(path) { return path ? BASE_URL + path : null; }
+
+  // ── PAGES ──
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-links button[id^="nav-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    if (document.getElementById('nav-' + name)) document.getElementById('nav-' + name).classList.add('active');
+    if (name === 'cars') loadCars();
+    if (name === 'categories') loadCategories();
+    if (name === 'home') loadStats();
+    if (name === 'admin') loadAdminData();
+  }
+
+  // ── AUTH UI ──
+  function renderAuthArea() {
+    const area = document.getElementById('nav-auth-area');
+    if (currentUser) {
+      const initials = (currentUser.firstname || '?')[0].toUpperCase();
+      area.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="user-chip" onclick="onUserClick()" title="Profil">
+            <div class="user-avatar">${initials}</div>
+            <span>${currentUser.firstname}</span>
+            ${currentUser.role === 'admin' ? '<span style="color:var(--accent);font-size:11px">• Admin</span>' : ''}
+          </div>
+          <button onclick="logout()" title="Chiqish" style="
+            background:transparent;
+            border:1px solid #3a2a2a;
+            color:var(--accent2);
+            padding:8px 14px;
+            border-radius:8px;
+            font-size:13px;
+            cursor:pointer;
+            font-family:DM Sans,sans-serif;
+            transition:all .2s;
+            display:flex;align-items:center;gap:6px;
+          " onmouseover="this.style.background='rgba(255,71,87,0.1)';this.style.borderColor='var(--accent2)'"
+             onmouseout="this.style.background='transparent';this.style.borderColor='#3a2a2a'">
+            ↩ Chiqish
+          </button>
+        </div>`;
+      if (document.getElementById('addCarBtn')) document.getElementById('addCarBtn').style.display = 'inline-flex';
+      if (document.getElementById('addCatBtn')) document.getElementById('addCatBtn').style.display = currentUser.role === 'admin' ? 'inline-flex' : 'none';
+    } else {
+      area.innerHTML = `<button class="btn-accent nav-links button" onclick="openModal('authModal')">Kirish</button>`;
+      ['addCarBtn','addCatBtn'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display='none'; });
+    }
+  }
+
+  function onUserClick() {
+    if (currentUser?.role === 'admin') showPage('admin');
+    else openChangePass();
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('show'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+  // ── AUTH TABS ──
+  function authTab(tab) {
+    ['login','register','otp','forgot','reset'].forEach(t => {
+      document.getElementById('auth-' + t).style.display = 'none';
+    });
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('auth-' + tab).style.display = 'block';
+    document.getElementById('authModalTitle').textContent =
+      {login:'KIRISH', register:'RO\'YXATDAN O\'TISH', otp:'TASDIQLASH',
+       forgot:'PAROLNI TIKLASH', reset:'YANGI PAROL'}[tab] || 'KIRISH';
+    if (tab === 'login') document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    if (tab === 'register') document.querySelectorAll('.tab-btn')[1].classList.add('active');
+  }
+
+  // ── OTP INPUT ──
+  function otpNext(el, idx) {
+    if (el.value.length === 1 && idx < 5) {
+      document.querySelectorAll('.otp-input')[idx + 1].focus();
+    }
+  }
+  function getOtpValue() {
+    return [...document.querySelectorAll('.otp-input')].map(i => i.value).join('');
+  }
+  function clearOtp() {
+    document.querySelectorAll('.otp-input').forEach(i => i.value = '');
+  }
+
+  // ── AUTH ACTIONS ──
+  async function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!email || !password) return toast('Email va parol kiriting', 'error');
+    const res = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    if (!res) return;
+    if (res.status === 200) {
+      accessToken = res.accessToken;
+      localStorage.setItem('accessToken', accessToken);
+      // Token dan user info olamiz
+      try {
+        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+        // firstname ni email dan olamiz (backend token da yozmagan)
+        const firstname = email.split('@')[0];
+        currentUser = { id: payload.sub, role: payload.role, firstname };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('userFirstname', firstname); // refresh uchun alohida saqlaymiz
+      } catch(e) {}
+      closeModal('authModal');
+      renderAuthArea();
+      toast('Muvaffaqiyatli kirdingiz!');
+      if (currentUser?.role === 'admin') showPage('admin');
+    } else toast(res.message || 'Xatolik', 'error');
+  }
+
+  async function doRegister() {
+    const firstname = document.getElementById('regFirst').value.trim();
+    const lastname = document.getElementById('regLast').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    if (!firstname || !email || !password) return toast("Ma'lumotlarni to'ldiring", 'error');
+    const res = await api('/auth/register', { method: 'POST', body: JSON.stringify({ firstname, lastname, email, password }) });
+    if (!res) return;
+    if (res.status === 200) {
+      otpEmail = email;
+      authTab('otp');
+      toast('Email manzilingizga kod yuborildi!');
+    } else toast(res.message || 'Xatolik', 'error');
+  }
+
+  async function doVerify() {
+    const otp = getOtpValue();
+    if (otp.length < 6) return toast('OTP kodini kiriting', 'error');
+    const email = otpEmail || document.getElementById('regEmail').value.trim();
+    const res = await api('/auth/verify/otp', { method: 'POST', body: JSON.stringify({ email, otp }) });
+    if (!res) return;
+    if (res.status === 200) {
+      toast('Email tasdiqlandi! Endi kirish mumkin.');
+      clearOtp();
+      authTab('login');
+    } else toast(res.message || 'Xatolik', 'error');
+  }
+
+  async function doResendOtp() {
+    const email = otpEmail;
+    if (!email) return toast('Email topilmadi', 'error');
+    const res = await api('/auth/resend/otp', { method: 'POST', body: JSON.stringify({ email }) });
+    if (res?.status === 200) toast('Kod qayta yuborildi!');
+    else toast(res?.message || 'Xatolik', 'error');
+  }
+
+  async function doForgot() {
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!email) return toast('Email kiriting', 'error');
+    const res = await api('/auth/forgot/password', { method: 'POST', body: JSON.stringify({ email }) });
+    if (res?.status === 200) {
+      forgotEmail = email;
+      authTab('reset');
+      toast('Tiklash kodi emailga yuborildi!');
+    } else toast(res?.message || 'Xatolik', 'error');
+  }
+
+  async function doReset() {
+    const otp = document.getElementById('resetOtp').value.trim();
+    const new_password = document.getElementById('resetNewPass').value;
+    if (!otp || !new_password) return toast("Ma'lumotlarni kiriting", 'error');
+    const res = await api('/auth/reset/password', { method: 'POST', body: JSON.stringify({ email: forgotEmail, otp, new_password }) });
+    if (res?.status === 200) { toast('Parol yangilandi!'); authTab('login'); }
+    else toast(res?.message || 'Xatolik', 'error');
+  }
+
+  async function doChangePass() {
+    const oldPassword = document.getElementById('oldPass').value;
+    const newPassword = document.getElementById('newPass').value;
+    const confirm = document.getElementById('confirmPass').value;
+    if (newPassword !== confirm) return toast('Parollar mos kelmadi', 'error');
+    const res = await api('/auth/change/password', { method: 'POST', body: JSON.stringify({ oldPassword, newPassword }) });
+    if (res?.status === 200) { toast('Parol o\'zgartirildi!'); closeModal('changePassModal'); }
+    else toast(res?.message || 'Xatolik', 'error');
+  }
+
+  function openChangePass() { openModal('changePassModal'); }
+
+  function logout() {
+    accessToken = null;
+    currentUser = null;
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('userFirstname');
+    renderAuthArea();
+    showPage('home');
+    toast('Chiqildingiz');
+  }
+
+  // ── CARS ──
+  async function loadCars() {
+    if (!accessToken) {
+      document.getElementById('carsGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-state-icon">🔐</div>
+        <h3>Kirish talab etiladi</h3>
+        <p>Mashinalarni ko'rish uchun tizimga kiring.</p>
+        <button class="btn-primary" style="margin-top:20px" onclick="openModal('authModal')">Kirish</button>
+      </div>`;
+      return;
+    }
+    document.getElementById('carsGrid').innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div> Yuklanmoqda...</div>';
+    const res = await api('/car/all');
+    if (!res) return;
+    allCars = Array.isArray(res) ? res : [];
+    renderCars(allCars);
+    updateCategoryFilter();
+    if (currentUser) document.getElementById('addCarBtn').style.display = 'inline-flex';
+  }
+
+  function renderCars(cars) {
+    const grid = document.getElementById('carsGrid');
+    if (!cars.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-state-icon">🚗</div><h3>Mashinalar topilmadi</h3><p>Hozircha hech qanday mashina yo'q.</p></div>`;
+      return;
+    }
+    grid.innerHTML = cars.map((c, i) => {
+      const imgSrc = c.car_image ? BASE_URL + c.car_image : null;
+      return `<div class="car-card" style="animation-delay:${i*0.07}s" onclick="viewCar('${c._id}')">
+        <div class="car-img-wrap">
+          ${imgSrc ? `<img src="${imgSrc}" alt="${c.car_name}" onerror="this.parentElement.innerHTML='<div class=\\'car-img-placeholder\\'>🚙</div>'">` : '<div class="car-img-placeholder">🚙</div>'}
+          <div class="car-badge">${c.production_year}</div>
+        </div>
+        <div class="car-body">
+          <div class="car-name">${c.car_name}</div>
+          <div class="car-category">${c.categoryId?.name || 'Kategoriya yo\'q'}</div>
+          <div class="car-specs">
+            ${c.color ? `<div class="spec"><span class="spec-icon">🎨</span>${c.color}</div>` : ''}
+            ${c.gearbox ? `<div class="spec"><span class="spec-icon">⚙️</span>${c.gearbox}</div>` : ''}
+            ${c.distance ? `<div class="spec"><span class="spec-icon">📍</span>${Number(c.distance).toLocaleString()} km</div>` : ''}
+            ${c.engine ? `<div class="spec"><span class="spec-icon">🔧</span>${c.engine}</div>` : ''}
+          </div>
+          <div class="car-footer">
+            <div class="car-price">${formatPrice(c.price)}<span>Narx</span></div>
+            <button class="btn-view" onclick="event.stopPropagation();viewCar('${c._id}')">Ko'rish →</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function filterCars() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const cat = document.getElementById('categoryFilter').value;
+    const sort = document.getElementById('sortFilter').value;
+    let filtered = allCars.filter(c => {
+      const nameMatch = c.car_name.toLowerCase().includes(q);
+      const catMatch = !cat || c.categoryId?._id === cat;
+      return nameMatch && catMatch;
+    });
+    if (sort === 'price_asc') filtered.sort((a,b) => a.price - b.price);
+    if (sort === 'price_desc') filtered.sort((a,b) => b.price - a.price);
+    if (sort === 'year_desc') filtered.sort((a,b) => b.production_year - a.production_year);
+    renderCars(filtered);
+  }
+
+  function updateCategoryFilter() {
+    const sel = document.getElementById('categoryFilter');
+    const existing = sel.innerHTML;
+    const opts = allCategories.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+    sel.innerHTML = '<option value="">Barcha kategoriyalar</option>' + opts;
+  }
+
+  async function viewCar(id) {
+    showPage('car-detail');
+    document.getElementById('nav-cars').classList.add('active');
+    document.getElementById('carDetailContent').innerHTML = '<div class="loading"><div class="spinner"></div> Yuklanmoqda...</div>';
+    const c = await api('/car/' + id);
+    if (!c) return;
+    const imgSrc = c.car_image ? BASE_URL + c.car_image : null;
+    document.getElementById('carDetailContent').innerHTML = `
+      <button class="car-detail-back" onclick="showPage('cars')">← Orqaga</button>
+      <div class="car-detail-grid">
+        <div>
+          <div class="car-detail-img">
+            ${imgSrc ? `<img src="${imgSrc}" alt="${c.car_name}" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:80px\\'>🚙</div>'">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:80px">🚙</div>'}
+          </div>
+        </div>
+        <div class="car-detail-info">
+          <div class="car-detail-cat">${c.categoryId?.name || 'Kategoriya yo\'q'}</div>
+          <div class="car-detail-name">${c.car_name}</div>
+          <div class="car-detail-price">${formatPrice(c.price)}</div>
+          <div class="car-detail-specs">
+            ${c.production_year ? `<div class="detail-spec"><div class="detail-spec-label">Yil</div><div class="detail-spec-value">${c.production_year}</div></div>` : ''}
+            ${c.color ? `<div class="detail-spec"><div class="detail-spec-label">Rang</div><div class="detail-spec-value">${c.color}</div></div>` : ''}
+            ${c.gearbox ? `<div class="detail-spec"><div class="detail-spec-label">Eshkak</div><div class="detail-spec-value">${c.gearbox}</div></div>` : ''}
+            ${c.engine ? `<div class="detail-spec"><div class="detail-spec-label">Dvigatel</div><div class="detail-spec-value">${c.engine}</div></div>` : ''}
+            ${c.distance ? `<div class="detail-spec"><div class="detail-spec-label">Masofa</div><div class="detail-spec-value">${Number(c.distance).toLocaleString()} km</div></div>` : ''}
+          </div>
+          ${c.description ? `<div class="car-detail-desc">${c.description}</div>` : ''}
+          ${currentUser?.role === 'admin' ? `
+          <div style="display:flex;gap:12px;margin-top:24px">
+            <button class="btn-secondary" onclick="openEditCar('${c._id}')">✏️ Tahrirlash</button>
+            <button class="btn-secondary" style="border-color:var(--accent2);color:var(--accent2)" onclick="deleteCar('${c._id}')">🗑️ O'chirish</button>
+          </div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  // ── CATEGORIES ──
+  async function loadCategories() {
+    document.getElementById('categoriesGrid').innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>';
+    const res = await api('/category/all');
+    allCategories = Array.isArray(res) ? res : [];
+    renderCategories(allCategories);
+    if (currentUser?.role === 'admin') document.getElementById('addCatBtn').style.display = 'inline-flex';
+  }
+
+  function renderCategories(cats) {
+    const grid = document.getElementById('categoriesGrid');
+    if (!cats.length) {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">📂</div><h3>Kategoriyalar yo\'q</h3></div>';
+      return;
+    }
+    grid.innerHTML = cats.map(c => {
+      const imgSrc = c.category_image ? BASE_URL + '/uploads/category_images/' + c.category_image : null;
+      return `<div class="category-card" onclick="filterByCat('${c._id}')">
+        ${imgSrc ? `<img class="cat-img" src="${imgSrc}" alt="${c.name}" onerror="this.outerHTML='<div class=\\'cat-img-placeholder\\'>📂</div>'">` : '<div class="cat-img-placeholder">📂</div>'}
+        <div class="cat-name">${c.name}</div>
+        <div class="cat-count">Tanlash →</div>
+        ${currentUser?.role === 'admin' ? `<div style="display:flex;gap:8px;margin-top:12px" onclick="event.stopPropagation()">
+          <button class="btn-sm" onclick="openEditCat('${c._id}','${c.name}')">✏️</button>
+        </div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  async function filterByCat(catId) {
+    showPage('cars');
+    document.getElementById('nav-cars').classList.add('active');
+    if (!accessToken) { openModal('authModal'); return; }
+    document.getElementById('carsGrid').innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>';
+    const res = await api('/car/category/' + catId);
+    allCars = Array.isArray(res) ? res : [];
+    renderCars(allCars);
+    document.getElementById('categoryFilter').value = catId;
+  }
+
+  // ── STATS ──
+  async function loadStats() {
+    // Faqat token bo'lsa so'rov yuboramiz
+    if (!accessToken) return;
+    const [cats, cars] = await Promise.all([
+      api("/category/all").catch(() => null),
+      api("/car/all").catch(() => null)
+    ]);
+    if (Array.isArray(cats)) {
+      allCategories = cats;
+      document.getElementById("stat-cats").textContent = cats.length + "+";
+    }
+    if (Array.isArray(cars)) {
+      allCars = cars;
+      document.getElementById("stat-cars").textContent = cars.length + "+";
+    }
+  }
+
+  // ── CAR FORM ──
+  async function openCarForm() {
+    if (!accessToken) return openModal('authModal');
+    document.getElementById('editCarId').value = '';
+    document.getElementById('carModalTitle').textContent = "MASHINA QO'SHISH";
+    document.getElementById('carName').value = '';
+    document.getElementById('carPrice').value = '';
+    document.getElementById('carYear').value = '';
+    document.getElementById('carColor').value = '';
+    document.getElementById('carDistance').value = '';
+    document.getElementById('carGearbox').value = '';
+    document.getElementById('carEngine').value = '';
+    document.getElementById('carDesc').value = '';
+    document.getElementById('carImageGroup').style.display = 'block';
+    await loadCatSelect('carCategory');
+    openModal('carModal');
+  }
+
+  async function openEditCar(id) {
+    const c = allCars.find(x => x._id === id) || await api('/car/' + id);
+    if (!c) return;
+    document.getElementById('editCarId').value = id;
+    document.getElementById('carModalTitle').textContent = 'TAHRIRLASH';
+    document.getElementById('carName').value = c.car_name || '';
+    document.getElementById('carPrice').value = c.price || '';
+    document.getElementById('carYear').value = c.production_year || '';
+    document.getElementById('carColor').value = c.color || '';
+    document.getElementById('carDistance').value = c.distance || '';
+    document.getElementById('carGearbox').value = c.gearbox || '';
+    document.getElementById('carEngine').value = c.engine || '';
+    document.getElementById('carDesc').value = c.description || '';
+    document.getElementById('carImageGroup').style.display = 'none';
+    await loadCatSelect('carCategory', c.categoryId?._id || c.categoryId);
+    openModal('carModal');
+  }
+
+  async function loadCatSelect(selId, selectedId = '') {
+    const res = await api('/category/all');
+    const cats = Array.isArray(res) ? res : [];
+    document.getElementById(selId).innerHTML = '<option value="">Kategoriya tanlang</option>' +
+      cats.map(c => `<option value="${c._id}" ${c._id === selectedId ? 'selected' : ''}>${c.name}</option>`).join('');
+  }
+
+  async function submitCar() {
+    const id = document.getElementById('editCarId').value;
+    const data = {
+      car_name: document.getElementById('carName').value,
+      price: document.getElementById('carPrice').value,
+      production_year: document.getElementById('carYear').value,
+      color: document.getElementById('carColor').value,
+      distance: document.getElementById('carDistance').value,
+      gearbox: document.getElementById('carGearbox').value,
+      engine: document.getElementById('carEngine').value,
+      description: document.getElementById('carDesc').value,
+      categoryId: document.getElementById('carCategory').value,
+    };
+    if (!data.car_name || !data.price || !data.categoryId) return toast("Majburiy maydonlarni to'ldiring", 'error');
+
+    if (id) {
+      const res = await api('/car/' + id, { method: 'PUT', body: JSON.stringify(data) });
+      if (res?.status === 200) { toast('Mashina yangilandi!'); closeModal('carModal'); loadCars(); if(document.getElementById('page-admin').classList.contains('active')) loadAdminData(); }
+      else toast(res?.message || 'Xatolik', 'error');
+    } else {
+      const file = document.getElementById('carImage').files[0];
+      if (!file) return toast('Rasm tanlang', 'error');
+      const fd = new FormData();
+      Object.entries(data).forEach(([k,v]) => fd.append(k, v));
+      fd.append('car_image', file);
+      const res = await api('/car/create', { method: 'POST', formData: fd });
+      if (res?.status === 201) { toast('Mashina qo\'shildi!'); closeModal('carModal'); loadCars(); if(document.getElementById('page-admin').classList.contains('active')) loadAdminData(); }
+      else toast(res?.message || 'Xatolik', 'error');
+    }
+  }
+
+  async function deleteCar(id) {
+    if (!confirm('Mashina o\'chirilsinmi?')) return;
+    const res = await api('/car/' + id, { method: 'DELETE' });
+    if (res?.status === 200) { toast('Mashina o\'chirildi!'); showPage('cars'); }
+    else toast(res?.message || 'Xatolik', 'error');
+  }
+
+  // ── CATEGORY FORM ──
+  function openCatForm() {
+    if (!accessToken) return openModal('authModal');
+    document.getElementById('editCatId').value = '';
+    document.getElementById('catModalTitle').textContent = "KATEGORIYA QO'SHISH";
+    document.getElementById('catName').value = '';
+    document.getElementById('catImageGroup').style.display = 'block';
+    openModal('catModal');
+  }
+
+  function openEditCat(id, name) {
+    document.getElementById('editCatId').value = id;
+    document.getElementById('catModalTitle').textContent = 'KATEGORIYANI TAHRIRLASH';
+    document.getElementById('catName').value = name;
+    document.getElementById('catImageGroup').style.display = 'none';
+    openModal('catModal');
+  }
+
+  async function submitCategory() {
+    const id = document.getElementById('editCatId').value;
+    const name = document.getElementById('catName').value.trim();
+    if (!name) return toast('Nom kiriting', 'error');
+    if (id) {
+      const res = await api('/category/update/' + id, { method: 'PUT', body: JSON.stringify({ name }) });
+      if (res?.status === 200) { toast('Yangilandi!'); closeModal('catModal'); loadCategories(); loadAdminData(); }
+      else toast(res?.message || 'Xatolik', 'error');
+    } else {
+      const file = document.getElementById('catImage').files[0];
+      if (!file) return toast('Rasm tanlang', 'error');
+      const fd = new FormData();
+      fd.append('name', name);
+      fd.append('category_image', file);
+      const res = await api('/category/create', { method: 'POST', formData: fd });
+      if (res?.status === 201) { toast('Kategoriya qo\'shildi!'); closeModal('catModal'); loadCategories(); loadAdminData(); }
+      else toast(res?.message || 'Xatolik', 'error');
+    }
+  }
+
+  // ── ADMIN ──
+  function adminTab(tab) {
+    ['cars','categories'].forEach(t => {
+      document.getElementById('admin-' + t + '-panel').style.display = t === tab ? 'block' : 'none';
+      document.getElementById('atab-' + t).classList.toggle('active', t === tab);
+    });
+    if (tab === 'cars') loadAdminCars();
+    if (tab === 'categories') loadAdminCats();
+  }
+
+  async function loadAdminData() {
+    if (currentUser?.role === 'admin') {
+      document.getElementById('adminUserInfo').textContent = 'Admin Dashboard';
+    }
+    await loadAdminCars();
+  }
+
+  async function loadAdminCars() {
+    const res = await api('/car/all');
+    const cars = Array.isArray(res) ? res : [];
+    allCars = cars;
+    document.getElementById('adminCarsTable').innerHTML = cars.length ?
+      cars.map(c => `<tr>
+        <td><strong>${c.car_name}</strong></td>
+        <td>${c.categoryId?.name || '—'}</td>
+        <td style="color:var(--accent)">${formatPrice(c.price)}</td>
+        <td>${c.production_year}</td>
+        <td>${c.color}</td>
+        <td><div class="table-actions">
+          <button class="btn-sm" onclick="openEditCar('${c._id}');openModal('carModal')">✏️</button>
+          <button class="btn-sm danger" onclick="deleteCar('${c._id}')">🗑️</button>
+        </div></td>
+      </tr>`).join('')
+      : '<tr><td colspan="6" class="text-center" style="padding:32px;color:var(--muted)">Mashinalar yo\'q</td></tr>';
+  }
+
+  async function loadAdminCats() {
+    const res = await api('/category/all');
+    const cats = Array.isArray(res) ? res : [];
+    allCategories = cats;
+    document.getElementById('adminCatsTable').innerHTML = cats.length ?
+      cats.map(c => `<tr>
+        <td><strong>${c.name}</strong></td>
+        <td style="color:var(--muted);font-size:13px">${new Date(c.createdAt).toLocaleDateString('uz-UZ')}</td>
+        <td><div class="table-actions">
+          <button class="btn-sm" onclick="openEditCat('${c._id}','${c.name}')">✏️</button>
+        </div></td>
+      </tr>`).join('')
+      : '<tr><td colspan="3" class="text-center" style="padding:32px;color:var(--muted)">Kategoriyalar yo\'q</td></tr>';
+  }
+
+  // ── CLOSE MODAL ON OVERLAY CLICK ──
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('show');
+    });
+  });
+
+  // ── INIT ──
+  async function init() {
+    isRefreshing = false;
+
+    // currentUser yoki accessToken bor bo'lsa sessiyani tiklashga urinamiz
+    const hadSession = !!accessToken || !!currentUser;
+
+    if (hadSession) {
+      // Refresh token (cookie) orqali yangi accessToken olamiz
+      const ok = await refreshAccessToken();
+
+      if (ok) {
+        // Refresh muvaffaqiyatli — currentUser ni tokendan tiklaymiz
+        const userFromToken = parseUserFromToken(accessToken);
+        if (userFromToken) {
+          // firstname ni localStorage dan olamiz (token da yo'q bo'lishi mumkin)
+          userFromToken.firstname = localStorage.getItem('userFirstname') || userFromToken.firstname;
+          currentUser = userFromToken;
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+      } else {
+        // Refresh token ham eskirgan — jimgina tozalaymiz, toast chiqarmaymiz
+        accessToken = null;
+        currentUser = null;
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('userFirstname');
+      }
+    }
+
+    renderAuthArea();
+    loadStats();
+  }
+
+  init();
+</script>
+</body>
+</html>
