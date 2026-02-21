@@ -8,11 +8,10 @@ const cors = require("cors");
 const path = require("path");
 
 dbconnection().catch(() => process.exit(1));
+
 const app = express();
 
-app.use(fileUpload({
-    createParentPath: true
-}));
+app.use(fileUpload({ createParentPath: true }));
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
@@ -22,25 +21,32 @@ const allowedOrigins = [
   "http://localhost:3000",
 ].filter(Boolean);
 
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // Postman/curl
-    if (allowedOrigins.includes(origin)) return cb(null, true);
-    return cb(null, false);
-  },
-  credentials: true,
-}));
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true); // Postman/curl
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      return cb(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(cookieParser());
+
+// uploads folder
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+// API
 app.use("/api", mainRouter);
+
+// frontend (static)
 app.use(express.static(path.join(process.cwd(), "frontend")));
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(process.cwd(), "frontend", "car-marketplace (5).html"));
 });
 
-
-let PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
