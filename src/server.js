@@ -28,6 +28,11 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(cookieParser());
 app.use("/api", mainRouter);
+app.use(express.static(path.join(process.cwd(), "frontend")));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(process.cwd(), "frontend", "car-marketplace (5).html"));
+});
+
 
 let PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
