@@ -14,16 +14,22 @@ app.use(fileUpload({
     createParentPath: true
 }));
 
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+  "http://localhost:3000",
+].filter(Boolean);
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",  
-    "http://localhost:5500",    
-    "http://127.0.0.1:5500",  
-    "http://localhost:3000",
-  ],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Postman/curl
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS: " + origin));
+  },
   credentials: true
 }));
-
 app.use(express.json());
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(cookieParser());
