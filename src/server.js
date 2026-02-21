@@ -23,11 +23,13 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Postman/curl
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Not allowed by CORS: " + origin));
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // Postman/curl
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(null, false);
   },
+  credentials: true,
+}));
   credentials: true
 }));
 app.use(express.json());
